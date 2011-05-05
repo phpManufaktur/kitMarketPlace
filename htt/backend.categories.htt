@@ -1,0 +1,57 @@
+{*
+ * kitMarketPlace
+ *
+ * @author Ralf Hertsch (ralf.hertsch@phpmanufaktur.de)
+ * @link http://phpmanufaktur.de
+ * @copyright 2011
+ * @license GNU GPL (http://www.gnu.org/licenses/gpl.html)
+ * @version $Id$
+ *}
+<div id="market_categories">
+  <h2>{$head}</h2>
+  <div class="{if $is_message == 1}message{else}intro{/if}">{$intro}</div>
+  <form name="{$form_name}" action="{$form_action}" method="post">
+    <input type="hidden" name="{$action_name}" value="{$action_value}" />
+    <input type="hidden" name="{$items_name}" value="{$items_value}" />
+    <table width="100%">
+      <colgroup>
+        <col width="19%" />
+        <col width="19%" />
+        <col width="19%" />
+        <col width="19%" />
+        <col width="19%" />
+        <col width="5%" />
+      </colgroup>
+      <tr>
+        {for i 1 5}<th>{$header.level.$i}</th>{/for}
+        <th>{$header.delete}</th>
+      </tr>
+      {foreach $categories cat}
+      <tr class="{cycle values=array('flip', 'flop')}">
+        {for i 1 5}<td>{if $cat.edit.$i == 0}{$cat.value.$i}{else}<input type="text" name="{$cat.request.edit.$i}" value="{$cat.value.$i}" /></td>{/for}
+        <td><input type="checkbox" name="{$cat.request.delete}[]" value="{$cat.id}" /></td>
+      </tr>
+      {/foreach}
+      <tr><td colspan="6">&nbsp;</td></tr>
+      <tr>
+        <td>{$add_cat_label}</td>
+        <td colspan="3">
+          <select name="{$select_cat_name}">
+            {foreach $select_cat_value option}<option value="{$option.id}">{$option.text}</option>{/foreach}
+          </select>
+        </td>
+        <td>
+          <input type="text" name="{$add_cat_name}" />
+        </td>
+        <td>&nbsp;</td>
+      </tr>
+      <tr><td colspan="6">&nbsp;</td></tr>
+      <tr>
+        <td colspan="6">
+          <input type="submit" value="{$btn_ok}" />&nbsp;
+          <input type="button" value="{$btn_abort}" onclick="javascript: window.location = '{$abort_location}'; return false;" />
+        </td>
+      </tr>
+    </table>
+  </form>
+</div>
