@@ -171,6 +171,7 @@ class marketFrontend {
   } // action
 	
 	public function showMarket() {
+		global $kitContactInterface;
 		$form = new formFrontend();
 		$params = $form->getParams();
 		$params[formFrontend::param_form] = 'market_login';
@@ -178,10 +179,19 @@ class marketFrontend {
 		$form->setParams($params);
 		
 		$result = $form->action();
-		if (is_string($result)) return $result;
-		if (is_array($result)) {
-			print_r($result);
-		}	
+		if (is_string($result)) {
+			return $result;
+		}
+		elseif (is_bool($result) && ($result == false) && $form->isError()) {
+			$this->setError($form->getError()); return false;
+		}
+		
+		$contact = $form->getContact();
+		if ($kitContactInterface->isAuthenticated()) {
+			echo "eureka!";
+		}
+		print_r($contact);
+		print_R($_SESSION);
 	} // showMarket()
 	
 } // class marketFrontend
