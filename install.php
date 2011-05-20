@@ -35,7 +35,7 @@ require_once(WB_PATH.'/modules/kit_market/class.market.php');
 
 global $admin;
 
-$tables = array('dbMarketAdvertisement');
+$tables = array('dbMarketAdvertisement', 'dbMarketCategories', 'dbMarketCfg');
 $error = '';
 
 foreach ($tables as $table) {
@@ -50,6 +50,8 @@ foreach ($tables as $table) {
 
 // Install Droplets
 $droplets = new checkDroplets();
+$droplets->droplet_path = WB_PATH.'/modules/kit_market/droplets/';
+
 if ($droplets->insertDropletsIntoTable()) {
   $message = sprintf(tool_msg_install_droplets_success, 'kitMarketPlace');
 }
