@@ -25,7 +25,7 @@ else {
 
 global $admin;
 
-$tables = array('db');
+$tables = array('dbMarketAdvertisement', 'dbMarketCategories', 'dbMarketCfg');
 $error = '';
 
 foreach ($tables as $table) {
