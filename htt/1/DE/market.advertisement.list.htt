@@ -1,0 +1,34 @@
+{*
+ * kitMarketPlace
+ *
+ * @author Ralf Hertsch (ralf.hertsch@phpmanufaktur.de)
+ * @link http://phpmanufaktur.de
+ * @copyright 2011
+ * @license GNU GPL (http://www.gnu.org/licenses/gpl.html)
+ * @version $Id$
+ * 
+ *}
+<div class="ad_list">
+  <table width="100%">
+    <colgroup>
+      <col width="33%" />
+      <col width="33%" />
+      <col width="34%" />
+    </colgroup>
+    {$i=0}
+    {foreach $items item}
+      {$i=$i+1}{if $i > 3}{$i=1}{/if}
+      {if $i == 1}<tr>{/if}
+        <td>
+          {if isset($item.images.1)}<img src="{$item.images.1.preview.url}" width="{$item.images.1.preview.width}" height="{$item.images.1.preview.height}" alt="{$item.title}" /><br />{/if}
+          <a href="{$item.link}">{$item.title}</a><br />
+          {$item.contact.kit_city}<br />
+          <b>{$item.price.text} EUR</b>
+        </td>
+      {if $i == 3}</tr>{/if}  
+    {/foreach}
+    {if $i == 0}<tr><td colspan="3"><div class="message">In dieser Kategorie gibt es leider keine Angebote oder Gesuche!</div></td></tr>
+    {elseif $i == 1}<td>&nbsp;</td><td>&nbsp;</td></tr>
+    {elseif $i == 2}<td>&nbsp;</td></tr>{/if}
+  </table>
+</div>

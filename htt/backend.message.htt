@@ -1,0 +1,13 @@
+{*
+ * kitForm
+ *
+ * @author Ralf Hertsch (ralf.hertsch@phpmanufaktur.de)
+ * @link http://phpmanufaktur.de
+ * @copyright 2011
+ * @license GNU GPL (http://www.gnu.org/licenses/gpl.html)
+ * @version $Id$
+ *}
+<div id="market_message">
+  <h2>{$form.title}</h2>
+  <div class="{if $form.is_message == 1}message{else}intro{/if}">{$form.message}</div>
+</div>

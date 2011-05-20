@@ -1,0 +1,59 @@
+{*
+ * kitMarketPlace
+ *
+ * @author Ralf Hertsch (ralf.hertsch@phpmanufaktur.de)
+ * @link http://phpmanufaktur.de
+ * @copyright 2011
+ * @license GNU GPL (http://www.gnu.org/licenses/gpl.html)
+ * @version $Id$
+ *}
+<div id="reg_list">
+  <h2>{$form.title}</h2>
+  <div class="{if $form.is_message == 1}message{else}intro{/if}">{$form.message}</div>
+  <form name="{$form.name}" action="{$form.action.link}" method="post">
+    <input type="hidden" name="{$form.action.name}" value="{$form.action.value}" />
+    <input type="hidden" name="{$form.items.name}" value="{$form.items.value}" />
+
+    <table width="100%">
+      <colgroup>
+        <col width="50" />
+        <col width="150" />
+        <col width="50" />
+        <col width="100" />
+        <col width="200" />
+        <col width="*" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>{$form.header.id}</th>
+          <th>{$form.header.timestamp}</th>
+          <th>{$form.header.type}</th>
+          <th>{$form.header.status}</th>
+          <th>{$form.header.title}</th>
+          <th>{$form.header.category}</th>
+        </tr>
+      </thead>
+      {foreach $advertisement ad}
+      <tr class="{cycle values=array('flip', 'flop')}">
+        <td><a href="{$ad.id.link}">{string_format($ad.id.value, '%04d')}</a></td>
+        <td>{$ad.timestamp.text}</td>
+        <td>{if ($ad.type.offer == 1)}Biete{else}Suche{/if}</td>
+        <td>
+          <select name="{$ad.status.name}">
+            {foreach $ad.status.values option}<option value="{$option.value}"{if $option.selected == 1} selected="selected"{/if}>{$option.text}</option>{/foreach}
+          </select>
+        </td>
+        <td>{$ad.title.text}</td>
+        <td>{$ad.category.text}</td>
+      </tr>  
+      {/foreach}
+      <tr><td colspan="6">&nbsp;</td></tr>
+      <tr>
+        <td colspan="3">&nbsp;</td>
+        <td colspan="3">
+          <input type="submit" value="{$form.btn.ok}" />
+        </td>
+      </tr>
+    </table>
+  </form>
+</div>

@@ -30,6 +30,23 @@ class dbMarketAdvertisement extends dbConnectLE {
 	const field_end_date				= 'ad_end_date';
 	const field_timestamp				= 'ad_timestamp';
 	
+	public $field_name_array = array(
+		self::field_id							=> market_field_id,
+		self::field_kit_id					=> market_field_kit_id,
+		self::field_category				=> market_field_category,
+		self::field_ad_type					=> market_field_ad_type,
+		self::field_commercial			=> market_field_commercial,
+		self::field_title						=> market_field_title,
+		self::field_price						=> market_field_price,
+		self::field_price_type			=> market_field_price_type,  
+		self::field_pictures				=> market_field_price_type,
+		self::field_text						=> market_field_text,
+		self::field_status					=> market_field_status,
+		self::field_start_date			=> market_field_start_date,
+		self::field_end_date				=> market_field_end_date,
+		self::field_timestamp				=> market_field_timestamp
+	);
+	
 	const type_offer						= 1;
 	const type_search						= 2;
 	const type_undefined				= 0;
@@ -69,6 +86,7 @@ class dbMarketAdvertisement extends dbConnectLE {
 	const status_outdated				= 4;
 	const status_deleted				= 5;
 	const status_rejected				= 6;
+	
 	
 	public $status_array = array(
 		self::status_active				=> market_status_active,
@@ -200,6 +218,17 @@ class dbMarketCfg extends dbConnectLE {
   const cfgCategory_03			= 'cfgCategory_03';
   const cfgCategory_04			= 'cfgCategory_04';
   const cfgCategory_05			= 'cfgCategory_05';
+  const cfgKITcategory			= 'cfgKITcategory';
+  const cfgFormDlgLogin			= 'cfgFormDlgLogin';
+  const cfgFormDlgAccount		= 'cfgFormDlgAccount';
+  const cfgAdPublishDirect	= 'cfgAdPublishDirect';
+  const cfgAdMaxImages			= 'cfgAdMaxImages';
+  const cfgAdMaxImageWidth	= 'cfgAdMaXImageWidth';
+  const cfgAdMaxImageHeight	= 'cfgAdMaxImageHeight';
+  const cfgAdImageTypes			= 'cfgAdImageTypes';
+  const cfgAdImageDir				= 'cfgAdImageDir';
+  const cfgAdImagePrevWidth = 'cfgAdImagePrevWidth';
+  const cfgAdListEntries		= 'cfgAdListEntries';
   
   public $config_array = array(
   	array('market_label_cfg_exec', self::cfgMarketExec, self::type_boolean, '1', 'market_desc_cfg_exec'),
@@ -208,8 +237,19 @@ class dbMarketCfg extends dbConnectLE {
   	array('market_label_category_03', self::cfgCategory_03, self::type_string, 'Art', 'market_desc_cfg_category_03'),
   	array('market_label_category_04', self::cfgCategory_04, self::type_string, 'Gruppe', 'market_desc_cfg_category_04'),
   	array('market_label_category_05', self::cfgCategory_05, self::type_string, 'Spezial', 'market_desc_cfg_category_05'),
-  	
+  	array('market_label_cfg_kit_category', self::cfgKITcategory, self::type_string, 'kitMarketPlace', 'market_desc_cfg_kit_category'),
+  	array('market_label_cfg_form_dlg_login', self::cfgFormDlgLogin, self::type_string, 'market_login', 'market_desc_cfg_form_dlg_login'),
+  	array('market_label_cfg_form_dlg_account', self::cfgFormDlgAccount, self::type_string, 'kit_account', 'market_desc_cfg_form_dlg_account'),
+  	array('market_label_cfg_ad_publish_direct', self::cfgAdPublishDirect, self::type_boolean, '0', 'market_desc_cfg_ad_publish_direct'),
+  	array('market_label_cfg_ad_max_images', self::cfgAdMaxImages, self::type_integer, '3', 'market_desc_cfg_ad_max_images'),
+  	array('market_label_cfg_ad_max_image_height', self::cfgAdMaxImageHeight, self::type_integer, '600', 'market_desc_cfg_ad_max_image_height'),
+  	array('market_label_cfg_ad_max_image_width', self::cfgAdMaxImageWidth, self::type_integer, '800', 'market_desc_cfg_ad_max_image_width'),
+  	array('market_label_cfg_ad_image_types', self::cfgAdImageTypes, self::type_array, 'jpg,png,tif,gif', 'market_desc_cfg_ad_image_types'),
+  	array('market_label_cfg_ad_image_dir', self::cfgAdImageDir, self::type_string, 'kit_market', 'market_desc_cfg_ad_image_dir'),
+  	array('market_label_cfg_ad_image_prev_width', self::cfgAdImagePrevWidth, self::type_integer, '200', 'market_desc_cfg_ad_image_prev_width'),
+  	array('market_label_cfg_ad_list_entries', self::cfgAdListEntries, self::type_integer, '20', 'market_desc_cfg_ad_list_entries') 
   );  
+  
   
   public function __construct($createTables = false) {
   	$this->createTables = $createTables;

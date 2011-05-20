@@ -39,6 +39,7 @@ if (!class_exists('dbconnectle')) 				require_once(WB_PATH.'/modules/dbconnect_l
 if (!class_exists('Dwoo')) 								require_once(WB_PATH.'/modules/dwoo/include.php');
 if (!class_exists('kitContactInterface')) require_once(WB_PATH.'/modules/kit/class.interface.php');	
 if (!class_exists('kitToolsLibrary'))   	require_once(WB_PATH.'/modules/kit_tools/class.tools.php');
+if (!class_exists('kitMail'))							require_once(WB_PATH.'/modules/kit/class.mail.php');
 
 require_once(WB_PATH .'/modules/'.basename(dirname(__FILE__)).'/class.market.php');
 

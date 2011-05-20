@@ -1,0 +1,24 @@
+{*
+ * kitMarketPlace
+ *
+ * @author Ralf Hertsch (ralf.hertsch@phpmanufaktur.de)
+ * @link http://phpmanufaktur.de
+ * @copyright 2011
+ * @license GNU GPL (http://www.gnu.org/licenses/gpl.html)
+ * @version $Id$
+ *}
+<div class="category_tree"> 
+{$level = 1}
+<ul>
+{foreach $categories cat}
+{if $cat.level > $level}<ul>
+{elseif ($level - $cat.level) == 1}</ul>
+{elseif ($level - $cat.level) == 2}</ul></ul>
+{elseif ($level - $cat.level) == 3}</ul></ul></ul>
+{elseif ($level - $cat.level) == 4}</ul></ul></ul></ul>
+{/if}
+{$level = $cat.level}
+<li class="category_{$cat.level}">{if $category == $cat.id}<b>{$cat.text}</b>{else}<a href="{$cat.link}">{$cat.text}</a>{/if}</li>
+{/foreach}
+{for i 0 $level-1}</ul>{/for}
+</div>

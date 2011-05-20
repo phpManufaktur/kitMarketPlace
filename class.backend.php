@@ -30,27 +30,33 @@ class marketBackend {
 	const action_config_check					= 'cfgc';
 	const action_default							= 'def';
 	const action_advertisement				= 'ead';
-	const action_advertisement_check	= 'eadc';
 	const action_list									= 'lst';
+	const action_list_check						= 'lstc';
 	
 	private $tab_navigation_array = array(
+		self::action_list								=> market_tab_overview,
 		self::action_advertisement			=> market_tab_advertisement,
 		self::action_categories					=> market_tab_categories,
 		self::action_config							=> market_tab_config,
 		self::action_about							=> market_tab_about
 	);
 	
-	private $page_link 					= '';
-	private $img_url						= '';
-	private $template_path			= '';
-	private $error							= '';
-	private $message						= '';
+	private $page_link 								= '';
+	private $img_url									= '';
+	private $template_path						= '';
+	private $error										= '';
+	private $message									= '';
+	private $media_path								= '';
+	private $media_url								= '';
 	
 	public function __construct() {
+		global $dbMarketCfg;
 		$this->page_link = ADMIN_URL.'/admintools/tool.php?tool=kit_market';
 		$this->template_path = WB_PATH . '/modules/' . basename(dirname(__FILE__)) . '/htt/' ;
 		$this->img_url = WB_URL. '/modules/'.basename(dirname(__FILE__)).'/images/';
 		date_default_timezone_set(tool_cfg_time_zone);
+		$this->media_path = WB_PATH.MEDIA_DIRECTORY.'/'.$dbMarketCfg->getValue(dbMarketCfg::cfgAdImageDir).'/';
+		$this->media_url = str_replace(WB_PATH, WB_URL, $this->media_path);
 	} // __construct()
 	
 	/**
@@ -176,10 +182,7 @@ class marketBackend {
     isset($_REQUEST[self::request_action]) ? $action = $_REQUEST[self::request_action] : $action = self::action_default;
   	switch ($action):
   	case self::action_advertisement:
-  		$this->show(self::action_advertisement, $this->dlgEditAdvertisement());
-  		break;
-  	case self::action_advertisement_check:
-  		$this->show(self::action_advertisement, $this->checkEditAdvertisement());
+  		$this->show(self::action_advertisement, $this->dlgViewAdvertisement());
   		break;
   	case self::action_categories:
   		$this->show(self::action_categories, $this->dlgCategories());
@@ -196,6 +199,10 @@ class marketBackend {
   	case self::action_about:
   		$this->show(self::action_about, $this->dlgAbout());
   		break;
+  	case self::action_list_check:
+  		$this->show(self::action_list, $this->dlgListCheck());
+  		break;
+  	case self::action_list:
   	default:
   		$this->show(self::action_list, $this->dlgList());
   		break;
@@ -229,10 +236,230 @@ class marketBackend {
   	echo $this->getTemplate('backend.body.htt', $data);
   } // show()
 	
+  /**
+   * Liefert den vollstaendigen Pfad auf die angegebene Kategorie
+   * 
+   * @param INT $category_id
+   * @return STR Kategorie BOOL FALSE bei Fehler
+   */
+  private function getCategoryString($category_id) {
+  	global $dbMarketCats;
+  	
+  	$cat = array();
+		$where = array(dbMarketCategories::field_id => $category_id);
+		$category = array();
+		if (!$dbMarketCats->sqlSelectRecord($where, $category)) {
+			$this->setError(sprintf('[%s - %] %s', __METHOD__, __LINE__, $dbMarketCats->getError()));
+			return false;
+		}
+		if (count($category) < 1) {
+			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $category_id)));
+			return false;
+		}
+		$category = $category[0];
+		for ($i=1;$i<6;$i++) {
+			if (!empty($category[sprintf('cat_level_%02d', $i)])) $cat[] = $category[sprintf('cat_level_%02d', $i)];
+		}
+		$cat_str = implode(' > ', $cat);
+		return $cat_str;
+  } // getCategoryString()
+  
   public function dlgList() {
-  	return __METHOD__;
+  	global $dbMarketAd;
+  	global $dbMarketCats;
+  	
+  	$SQL = sprintf(	"SELECT * FROM %s WHERE %s!='%s' ORDER BY %s DESC",
+  									$dbMarketAd->getTableName(),
+  									dbMarketAdvertisement::field_status,
+  									dbMarketAdvertisement::status_deleted,
+  									dbMarketAdvertisement::field_timestamp);
+  	$ads = array();
+  	if (!$dbMarketAd->sqlExec($SQL, $ads)) {
+  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbMarketAd->getError()));
+  		return false;
+  	}
+  	$list = array();
+  	$items = array();
+  	foreach ($ads as $ad) {
+  		// Kategorien
+  		$cat_str = $this->getCategoryString($ad[dbMarketAdvertisement::field_category]);
+  		
+			$status = array();
+			foreach ($dbMarketAd->status_array as $value => $text) {
+				$status[] = array(
+					'value'			=> $value,
+					'text'			=> $text,
+					'selected'	=> ($ad[dbMarketAdvertisement::field_status] == $value) ? 1 : 0
+				);
+			}
+  		$list[] = array(
+  			'id'				=> array( 'value'		=> $ad[dbMarketAdvertisement::field_id],
+  														'link'		=> sprintf('%s&%s=%s&%s=%s', $this->page_link, self::request_action, self::action_advertisement, dbMarketAdvertisement::field_id, $ad[dbMarketAdvertisement::field_id])),
+  			'timestamp'	=> array(	'text'		=> date(tool_cfg_datetime_str, strtotime($ad[dbMarketAdvertisement::field_timestamp])),
+  														'unix'		=> strtotime($ad[dbMarketAdvertisement::field_timestamp])),
+  			'type'			=> array(	'offer'		=> ($ad[dbMarketAdvertisement::field_ad_type] == dbMarketAdvertisement::type_offer) ? 1 : 0),
+				'title'			=> array(	'text'		=> $ad[dbMarketAdvertisement::field_title]),
+				'category'	=> array(	'text'		=> $cat_str),
+  			'status'		=> array(	'values'	=> $status,
+  														'text'		=> $dbMarketAd->status_array[$ad[dbMarketAdvertisement::field_status]],
+  														'name'		=> sprintf('%s_%s', dbMarketAdvertisement::field_status, $ad[dbMarketAdvertisement::field_id]))
+  		);
+  		$items[] = $ad[dbMarketAdvertisement::field_id];
+  	}
+  	$form = array(
+			'name'					=> 'market_list',
+			'action'				=> array(	'link'				=> $this->page_link,
+																'name'				=> self::request_action,
+																'value'				=> self::action_list_check),
+			'items'					=> array( 'name'				=> self::request_items,
+																'value'				=> implode(",", $items)), 
+			'title'					=> market_head_advertisement_overview,
+			'is_message'		=> $this->isMessage() ? 1 : 0,
+			'message'				=> $this->isMessage() ? $this->getMessage() : market_intro_advertisement_overview,
+  		'header'				=> array(	'id'					=> market_th_id,
+																'kit_id'			=> market_th_kit_id,
+																'category'		=> market_th_category,
+																'type'				=> market_th_type,
+																'commercial'	=> market_th_commercial,
+																'title'				=> market_th_title,
+																'price'				=> market_th_price,
+																'price_type'	=> market_th_price_type,
+																'pictures'		=> market_th_pictures,
+																'text'				=> market_th_text,
+																'status'			=> market_th_status,
+																'start_date'	=> market_th_start_date,
+																'end_date'		=> market_th_end_date,
+																'timestamp'		=> market_th_timestamp),
+  		'btn'						=> array( 'ok'					=> tool_btn_ok)
+		);
+		$data = array(
+			'form'					=> $form,
+			'advertisement'	=> $list
+		);
+		return $this->getTemplate('backend.advertisement.list.htt', $data);
   } // dlgList()
   
+  public function dlgListCheck() {
+  	global $dbMarketAd;
+  	global $dbMarketCats;
+  	
+  	if (!isset($_REQUEST[self::request_items])) {
+  		$this->setError(sprintf('[%s - %] %s', __METHOD__, __LINE__, sprintf(tool_error_request_missing, self::request_items)));
+  		return false;
+  	}
+  	if (empty($_REQUEST[self::request_items])) return $this->dlgList();
+  	
+  	$SQL = sprintf( "SELECT * FROM %s WHERE %s IN (%s)",
+  									$dbMarketAd->getTableName(),
+  									dbMarketAdvertisement::field_id,
+  									$_REQUEST[self::request_items]);
+  	$ads = array();
+  	if (!$dbMarketAd->sqlExec($SQL, $ads)) {
+  		$this->setError(sprintf('[%s - %] %s', __METHOD__, __LINE__, $dbMarketAd->getError()));
+  		return false;
+  	}
+  	$message = '';
+  	foreach ($ads as $ad) {
+  		if (isset($_REQUEST[sprintf('%s_%s', dbMarketAdvertisement::field_status, $ad[dbMarketAdvertisement::field_id])])) {
+  			$new_status = $_REQUEST[sprintf('%s_%s', dbMarketAdvertisement::field_status, $ad[dbMarketAdvertisement::field_id])];
+  			if ($new_status != $ad[dbMarketAdvertisement::field_status]) {
+  				$old_status = $ad[dbMarketAdvertisement::field_status];
+  				$where = array(dbMarketAdvertisement::field_id => $ad[dbMarketAdvertisement::field_id]);
+  				$data = array(dbMarketAdvertisement::field_status => $new_status);
+  				if (!$dbMarketAd->sqlUpdateRecord($data, $where)) {
+  					$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbMarketAd->getError()));
+  					return false;
+  				}
+  				$message .= sprintf(market_msg_ad_status_changed, $ad[dbMarketAdvertisement::field_id], $dbMarketAd->status_array[$new_status]);
+  				/**
+  				 * @todo Statusmeldungen verschicken?
+  				 */
+  				if (!$this->sendStatusMail($ad[dbMarketAdvertisement::field_kit_id], $ad[dbMarketAdvertisement::field_id], $old_status)) {
+  					$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $this->getError()));
+  					return false;
+  				}
+  				$message .= sprintf(market_msg_ad_status_mail_send, $ad[dbMarketAdvertisement::field_id]);
+  			}
+  		}
+  	}
+  	$this->setMessage($message);
+  	return $this->dlgList();
+  } // dlgListCheck()
+  
+  /**
+   * Versendet eine E-Mail an den Kunden und teilt die Aenderung des STATUS mit
+   * 
+   * @param INT $contact_id
+   * @param INT $advertisement_id
+   * @param INT $old_status
+   * @return BOOL
+   */
+  public function sendStatusMail($contact_id, $advertisement_id, $old_status) {
+  	global $dbMarketAd;
+  	global $kitContactInterface;
+
+  	// Kontaktdaten
+  	if (!$kitContactInterface->getContact($contact_id, $contact)) {
+  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitContactInterface->getError()));
+  		return false;
+  	}
+  	
+  	// Kleinanzeige
+  	$where = array(dbMarketAdvertisement::field_id => $advertisement_id);
+  	$ad = array();
+  	if (!$dbMarketAd->sqlSelectRecord($where, $ad)) {
+  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbMarketAd->getError()));
+  		return false;
+  	}
+  	if (count($ad) < 1) {
+  		$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $advertisement_id)));
+  		return false;
+  	}
+  	$ad = $ad[0];
+  	
+  	$advertisement = array(
+  		'id'					=> $ad[dbMarketAdvertisement::field_id],
+  		'kit_id'			=> $ad[dbMarketAdvertisement::field_kit_id],
+  		'category'		=> array( 'id'			=> $ad[dbMarketAdvertisement::field_category],
+  														'text'		=> $this->getCategoryString($ad[dbMarketAdvertisement::field_category])),
+  		'type'				=> array( 'value'		=> $ad[dbMarketAdvertisement::field_ad_type],
+  														'text'		=> $dbMarketAd->type_array[$ad[dbMarketAdvertisement::field_ad_type]]),
+  		'commercial'	=> array( 'value'		=> $ad[dbMarketAdvertisement::field_commercial],
+  														'text'		=> $dbMarketAd->commercial_array[$ad[dbMarketAdvertisement::field_commercial]]),
+  		'title'				=> $ad[dbMarketAdvertisement::field_title],
+  		'price'				=> array( 'value'		=> $ad[dbMarketAdvertisement::field_price],
+  														'text'		=> number_format($ad[dbMarketAdvertisement::field_price], 2, tool_cfg_decimal_separator, tool_cfg_thousand_separator)),
+  		'price_type'	=> array( 'value'		=> $ad[dbMarketAdvertisement::field_price_type],
+  														'text'		=> $dbMarketAd->price_array[$ad[dbMarketAdvertisement::field_price_type]]),
+  		'text'				=> $ad[dbMarketAdvertisement::field_text],
+  		'status'			=> array( 'value'		=> $ad[dbMarketAdvertisement::field_status],
+  														'text'		=> $dbMarketAd->status_array[$ad[dbMarketAdvertisement::field_status]]),
+  		'status_old'	=> array(	'value'		=> $old_status,
+  														'text'		=> $dbMarketAd->status_array[$old_status]),
+  		'timestamp'		=> array(	'value'		=> $ad[dbMarketAdvertisement::field_timestamp],
+  														'text'		=> date(tool_cfg_datetime_str, strtotime($ad[dbMarketAdvertisement::field_timestamp])),
+  														'unix'		=> strtotime($ad[dbMarketAdvertisement::field_timestamp]))
+  	);
+  	$data = array(
+  		'contact'				=> $contact,
+  		'advertisement'	=> $advertisement
+  	);
+  	$status_mail = $this->getTemplate('backend.mail.advertisement.status.changed', $data);
+  	
+  	$mail = new kitMail();
+		if (!$mail->mail(market_mail_subject_status_changed, $status_mail, SERVER_EMAIL, SERVER_EMAIL, array($contact[kitContactInterface::kit_email] => $contact[kitContactInterface::kit_email]), false)) {
+			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_mail_sending, $contact[kitContactInterface::kit_email])));
+			return false;
+		}
+		
+  	return true;
+  } // sendStatusMail()
+  
+  /**
+   * Information ueber kitMarketPlace
+   * 
+   * @return STR dialog
+   */
   public function dlgAbout() {
   	$data = array(
   		'version'					=> sprintf('%01.2f', $this->getVersion()),
@@ -242,6 +469,11 @@ class marketBackend {
   	return $this->getTemplate('backend.about.htt', $data);
   } // dlgAbout()
   
+  /**
+   * Dialog zur Konfiguration und Anpassung von kitMarketPlace
+   * 
+   * @return STR dialog
+   */
   public function dlgConfig() {
 		global $dbMarketCfg;
 		$SQL = sprintf(	"SELECT * FROM %s WHERE NOT %s='%s' ORDER BY %s",
@@ -343,6 +575,11 @@ class marketBackend {
 		return $this->dlgConfig();
 	} // checkConfig()
   
+	/**
+	 * Dialog zum Erstellen und Bearbeiten von Kategorien
+	 * 
+	 * @return STR dialog
+	 */
 	public function dlgCategories() {
 		global $dbMarketCats;
 		global $dbMarketCfg;
@@ -430,6 +667,12 @@ class marketBackend {
 		return $this->getTemplate('backend.categories.htt', $data);
 	} // dlgCategories()
 	
+	/**
+	 * Ueberprueft Aenderungen die im Dialog dlgCategories() vorgenommen wurden
+	 * und aktualisiert den Datensatz oder legt einen neuen an.
+	 * 
+	 * @return STR dlgCategories()
+	 */
 	public function checkCategories() {
 		global $dbMarketCats;
 		global $dbMarketCfg;
@@ -557,14 +800,157 @@ class marketBackend {
 		return $this->dlgCategories();
 	} // checkCategories()
 	
-	public function dlgEditAdvertisement() {
-		global $bdMarketAd;
+	public function dlgViewAdvertisement() {
+		global $dbMarketAd;
+		global $kitContactInterface;
+		global $kitLibrary;
+		global $dbMarketCfg;
 		
-	} // dlgEditAdvertisement()
+		if (!isset($_REQUEST[dbMarketAdvertisement::field_id])) {
+			$data = array(
+				'form'				=> array(	'title'		=> market_head_advertisement,
+				'is_message'	=> 1,
+				'message'			=> market_msg_ad_select_ad)
+			);
+			return $this->getTemplate('backend.message.htt', $data);
+		}
+		
+		$where = array(dbMarketAdvertisement::field_id => $_REQUEST[dbMarketAdvertisement::field_id]);
+		$ad = array();
+		if (!$dbMarketAd->sqlSelectRecord($where, $ad)) {
+			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $dbMarketAd->getError()));
+			return false;
+		}
+		if (count($ad) < 1) {
+			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_id_invalid, $_REQUEST[dbMarketAdvertisement::field_id])));
+			return false;
+		}
+		$ad = $ad[0];
+		
+		if (!$kitContactInterface->getContact($ad[dbMarketAdvertisement::field_kit_id], $contact)) {
+			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, $kitContactInterface->getError()));
+			return false;
+		}
+		$contact['kit_id'] = $ad[dbMarketAdvertisement::field_kit_id];
+		
+		$form = array(
+			'kit_link'			=> sprintf('%s/admintools/tool.php?tool=kit&act=con&%s=%s', ADMIN_URL, dbKITcontact::field_id, $ad[dbMarketAdvertisement::field_kit_id])
+		);
+		
+		$post_max_size = $kitLibrary->convertBytes(ini_get('post_max_size'));
+		$upload_max_filesize = $kitLibrary->convertBytes(ini_get('upload_max_filesize'));
+		$max_size = ($post_max_size >= $upload_max_filesize) ? $upload_max_filesize : $post_max_size;
+		$max_size = $kitLibrary->bytes2Str($max_size);
+		$max_images = $dbMarketCfg->getValue(dbMarketCfg::cfgAdMaxImages);
+		$max_image_width = $dbMarketCfg->getValue(dbMarketCfg::cfgAdMaxImageWidth);
+		$max_image_height = $dbMarketCfg->getValue(dbMarketCfg::cfgAdMaxImageHeight);
+		$prev_width = $dbMarketCfg->getValue(dbMarketCfg::cfgAdImagePrevWidth);
+		$file_types = implode(', ', $dbMarketCfg->getValue(dbMarketCfg::cfgAdImageTypes));
+		$images = array();
+		$pictures = (!empty($ad[dbMarketAdvertisement::field_pictures])) ? explode(',', $ad[dbMarketAdvertisement::field_pictures]) : array();
+		
+		$upl_path = $this->media_path.$ad[dbMarketAdvertisement::field_kit_id].'/'.$ad[dbMarketAdvertisement::field_id].'/';
+		$upl_url = str_replace(WB_PATH, WB_URL, $upl_path);
+		$prev_path = $upl_path.$prev_width.'/';
+		$prev_url = str_replace(WB_PATH, WB_URL, $prev_path);
+		
+		$tmp_dir = $this->media_path.$ad[dbMarketAdvertisement::field_kit_id].'/tmp/';
+					
+		foreach ($pictures as $picture) {
+			if (!file_exists($upl_path.$picture)) {
+				if (file_exists($tmp_dir.$picture)) {
+					// Datei befindet sich noch im TEMP Verzeichnis, verschieben...
+					if (!file_exists($upl_path)) {
+						// Verzeichnis erstellen
+						if (!mkdir($upl_path, 0755, true)) {
+							$this->setError(sprintf('[%s - %s] %s', sprintf(tool_error_mkdir, $upl_path)));
+							return false;
+						}
+					}
+					if (!rename($tmp_dir.$picture, $upl_path.$picture)) {
+						$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_move_file, $tmp_dir.$picture, $upl_path.$picture)));
+						return false;
+					}
+				}
+				else {
+					// Datei nicht gefunden
+					$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_missing_file, $upl_path.$picture)));
+					return false;
+				}
+			}
+			// Dateiinformationen
+			$path_parts = pathinfo($upl_path.$picture);
+			// Breite und Hoehe festhalten
+			list($full_width, $full_height) = getimagesize($upl_path.$picture);
+			// Vorschaubild pruefen
+			if (!file_exists($prev_path.$picture)) {
+				$factor = $prev_width/$full_width;
+  			$new_height = ceil($full_height*$factor);
+  			$new_width = ceil($full_width*$factor);
+  			if (false === ($new_file = $this->createTweakedFile($path_parts['filename'], $path_parts['extension'], $upl_path.$picture, 
+  	  																												$new_width, $new_height, $full_width, $full_height))) {
+  	  			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_tweaking_file, $upl_path.$picture)));
+  	  			return false;																										
+  	  	}
+  	  	if (!file_exists($prev_path)) {
+  	  		if (!mkdir($prev_path, 0755, true)) {
+  	  			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_mkdir, $prev_path)));
+  	  			return false;
+  	  		}
+  	  	}	
+  			if (!rename($new_file, $prev_path.$picture)) {
+  				$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(tool_error_move_file, $new_file, $prev_path.$picture)));
+  				return false;
+  			}	
+			}
+			list($prev_width, $prev_height) = getimagesize($prev_path.$picture);
+			$images[] = array(
+				'fullsize'		=> array(	'url'			=> $upl_url.$picture,
+																'width'		=> $full_width,
+																'height'	=> $full_height	),
+				'preview'			=> array( 'url'			=> $prev_url.$picture,
+																'width'		=> $prev_width,
+																'height'	=> $prev_height )
+			);
+		}
+		
+		
+		$advertisement = array(
+			'type'			=> array(	'label'	=> market_label_adv_type,
+														'text'	=> $dbMarketAd->type_array[$ad[dbMarketAdvertisement::field_ad_type]]),
+			'category'	=> array(	'label'	=> market_label_adv_category,
+														'text'	=> $this->getCategoryString($ad[dbMarketAdvertisement::field_category])),
+			'status'		=> array(	'label'	=> market_label_adv_status,
+														'text'	=> $dbMarketAd->status_array[$ad[dbMarketAdvertisement::field_status]]),
+			'commercial'=> array(	'label'	=> market_label_adv_commercial,
+														'text'	=> $dbMarketAd->commercial_array[$ad[dbMarketAdvertisement::field_commercial]]),
+			'title'			=> array(	'label'	=> market_label_adv_title,
+														'text'	=> $ad[dbMarketAdvertisement::field_text]),
+			'text'			=> array(	'label'	=> market_label_adv_text,
+														'text'	=> $ad[dbMarketAdvertisement::field_text]),
+			'price'			=> array(	'label'	=> market_label_adv_price,
+														'text'	=> number_format($ad[dbMarketAdvertisement::field_price], 2, tool_cfg_decimal_separator, tool_cfg_thousand_separator)),
+			'price_type'=> array(	'label'	=> market_label_adv_price_type,
+														'text'	=> $dbMarketAd->price_array[$ad[dbMarketAdvertisement::field_price_type]]),
+			'image'				=> array(	'label'			=> market_label_adv_image_upload,
+															'name'			=> dbMarketAdvertisement::field_pictures,
+															'values'		=> $images,
+															'hint'			=> sprintf(market_hint_adv_image_size, $max_images, $max_size),
+															'max_img' 	=> $max_images,
+															'max_size'	=> $max_size,
+															'max_width'	=> $max_image_width,
+															'max_height'=> $max_image_height,
+															'file_types'=> $file_types)
+		);
+		 
+		$data = array(
+			'form'					=> $form,
+			'advertisement'	=> $advertisement,
+			'contact'				=> $contact
+		);
+		return $this->getTemplate('backend.advertisement.view.htt', $data);
+	} // dlgViewAdvertisement()
 	
-	public function checkEditAdvertisement() {
-		
-	} // checkAdvertisement()
 	
 } // class marketBackend
 

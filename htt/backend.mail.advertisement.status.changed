@@ -1,0 +1,19 @@
+{*
+ * kitMarketPlace
+ *
+ * @author Ralf Hertsch (ralf.hertsch@phpmanufaktur.de)
+ * @link http://phpmanufaktur.de
+ * @copyright 2011
+ * @license GNU GPL (http://www.gnu.org/licenses/gpl.html)
+ * @version $Id$
+ *}
+{if count_characters($contact.kit_last_name) > 0}Sehr geehrte{if $contact.kit_title == 'titleMister'}r Herr{else} Frau{/if} {$contact.kit_last_name},{else}Sehr geehrte Kundin, sehr geehrter Kunde,{/if}
+
+der Status Ihrer Kleinanzeige "{$advertisement.title}" hat sich von {$advertisement.status_old.text} auf:
+
+{$advertisement.status.text}
+
+geändert.
+
+Mit freundlichen Grüßen
+Ihr Kleinanzeigen Team

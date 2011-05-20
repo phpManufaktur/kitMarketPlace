@@ -1,0 +1,25 @@
+{*
+ * kitMarketPlace
+ *
+ * @author Ralf Hertsch (ralf.hertsch@phpmanufaktur.de)
+ * @link http://phpmanufaktur.de
+ * @copyright 2011
+ * @license GNU GPL (http://www.gnu.org/licenses/gpl.html)
+ * @version $Id$
+ *}
+<div class="market_body">
+  <table>
+    <colgroup>
+      <col width="200" />
+      <col width="*" />
+    </colgroup>
+    <tr>
+      <td>
+        {include('market.categories.tree.htt')}
+      </td>
+      <td>
+        {$content}
+      </td>
+    </tr>
+  </table>
+</div>
