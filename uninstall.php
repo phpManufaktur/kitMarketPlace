@@ -15,11 +15,11 @@ if (!defined('WB_PATH')) die('invalid call of '.$_SERVER['SCRIPT_NAME']);
 // include language file
 if(!file_exists(WB_PATH .'/modules/kit_tools/languages/' .LANGUAGE .'.php')) {
 	require_once(WB_PATH .'/modules/kit_tools/languages/DE.php'); // Vorgabe: DE verwenden 
-	if (!defined('KIT_FORM_LANGUAGE')) define('KIT_MARKET_LANGUAGE', 'DE'); // die Konstante gibt an in welcher Sprache KIT MarketPlace aktuell arbeitet
+	if (!defined('KIT_MARKET_LANGUAGE')) define('KIT_MARKET_LANGUAGE', 'DE'); // die Konstante gibt an in welcher Sprache KIT MarketPlace aktuell arbeitet
 }
 else {
 	require_once(WB_PATH .'/modules/kit_tools/languages/' .LANGUAGE .'.php');
-	if (!defined('KIT_FORM_LANGUAGE')) define('KIT_MARKET_LANGUAGE', LANGUAGE); // die Konstante gibt an in welcher Sprache KIT MarketPlace aktuell arbeitet
+	if (!defined('KIT_MARKET_LANGUAGE')) define('KIT_MARKET_LANGUAGE', LANGUAGE); // die Konstante gibt an in welcher Sprache KIT MarketPlace aktuell arbeitet
 }
 
 
