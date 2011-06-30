@@ -35,7 +35,7 @@ define('market_desc_cfg_category_03',					'Legen Sie die Kategorie der Ebene <b>
 define('market_desc_cfg_category_04',					'Legen Sie die Kategorie der Ebene <b>04</b> fest.');
 define('market_desc_cfg_category_05',					'Legen Sie die Kategorie der Ebene <b>05</b> fest.');
 define('market_desc_cfg_exec',								'Legen Sie fest, ob kitMarketPlace ausgeführt wird oder nicht (1=JA, 0=Nein)');
-define('market_desc_cfg_form_dlg_account',		'Der kitForm Dialgo, der von kitMarketPlace für die Verwaltung der Kundendaten (Account) verwendet wird.');
+define('market_desc_cfg_form_dlg_account',		'Der kitForm Dialog, der von kitMarketPlace für die Verwaltung der Kundendaten (Account) verwendet wird.');
 define('market_desc_cfg_form_dlg_login',			'Der kitForm Dialog, der von kitMarketPlace für die Anmeldung von Benutzern angezeigt wird.'); 
 define('market_desc_cfg_kit_category',				'KeepInTouch (KIT) Kategorie, der ein Nutzer zugeordnet sein muss, damit er ein Konto in kitMarketPlace einrichten kann.');
 
