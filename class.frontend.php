@@ -821,6 +821,12 @@ class marketFrontend {
 					$new_advertisement[$key] = $_REQUEST[$key];
 				}
 				break;
+			case dbMarketAdvertisement::field_status:
+				if (isset($_REQUEST[$key])) {
+					$new_advertisement[$key] = dbMarketAdvertisement::status_closed;
+					$changed = true;
+				}
+				break;
 			default:
 				// allgemeine Felder
 				if (!isset($_REQUEST[$key]) || empty($_REQUEST[$key])) {
