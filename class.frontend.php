@@ -380,7 +380,7 @@ class marketFrontend {
 		global $dbMarketCfg;
 		
 		if ($kitContactInterface->isAuthenticated()) {
-			// Pruefung der Kategorien - MUSS INS BACKEND!
+			// Pruefung der Kategorien
 			$cat = $dbMarketCfg->getValue(dbMarketCfg::cfgKITcategory);
 			if (!$kitContactInterface->existsCategory(kitContactInterface::category_type_intern, $cat)) {
 				if (!$kitContactInterface->addCategory(kitContactInterface::category_type_intern, $cat, $cat)) {
