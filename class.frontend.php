@@ -428,7 +428,9 @@ class marketFrontend {
 			return false;
 		}
 		elseif (is_bool($result) && ($result == true)) {
-			return true;
+			//return true;
+			// user is logged in, now check if he is allowed to access kitMarketPlace
+			return $this->accountIsAuthenticated();
 		}
 		else {
 			$this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, market_error_undefined));
