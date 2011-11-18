@@ -9,8 +9,24 @@
  * @version $Id$
  */
 
-// prevent this file from being accessed directly
-if (!defined('WB_PATH')) die('invalid call of '.$_SERVER['SCRIPT_NAME']);
+// include class.secure.php to protect this file and the whole CMS!
+if (defined('WB_PATH')) {    
+    if (defined('LEPTON_VERSION')) include(WB_PATH.'/framework/class.secure.php'); 
+} else {
+    $oneback = "../";
+    $root = $oneback;
+    $level = 1;
+    while (($level < 10) && (!file_exists($root.'/framework/class.secure.php'))) {
+        $root .= $oneback;
+        $level += 1;
+    }
+    if (file_exists($root.'/framework/class.secure.php')) { 
+        include($root.'/framework/class.secure.php'); 
+    } else {
+        trigger_error(sprintf("[ <b>%s</b> ] Can't include class.secure.php!", $_SERVER['SCRIPT_NAME']), E_USER_ERROR);
+    }
+}
+// end include class.secure.php
 
 // Deutsche Modulbeschreibung
 $module_description 	= 'kitMarketPlace - der Marktplatz für KeepInTouch (KIT)';
@@ -35,11 +51,13 @@ define('market_desc_cfg_category_03',					'Legen Sie die Kategorie der Ebene <b>
 define('market_desc_cfg_category_04',					'Legen Sie die Kategorie der Ebene <b>04</b> fest.');
 define('market_desc_cfg_category_05',					'Legen Sie die Kategorie der Ebene <b>05</b> fest.');
 define('market_desc_cfg_exec',								'Legen Sie fest, ob kitMarketPlace ausgeführt wird oder nicht (1=JA, 0=Nein)');
-define('market_desc_cfg_form_dlg_account',		'Der kitForm Dialog, der von kitMarketPlace für die Verwaltung der Kundendaten (Account) verwendet wird.');
+define('market_desc_cfg_form_dlg_account', 		'Der kitForm Dialog, der von kitMarketPlace für die Verwaltung der Kundendaten (Account) verwendet wird.');
 define('market_desc_cfg_form_dlg_login',			'Der kitForm Dialog, der von kitMarketPlace für die Anmeldung von Benutzern angezeigt wird.'); 
 define('market_desc_cfg_kit_category',				'KeepInTouch (KIT) Kategorie, der ein Nutzer zugeordnet sein muss, damit er ein Konto in kitMarketPlace einrichten kann.');
 
 define('market_error_auth_wrong_category',		'<p>Ihr Benutzerkonto gestattet Ihnen leider keinen Zugriff auf die Verwaltung von kitMarketPlace.</p><p>Bitte wenden Sie sich an den Service, dieser kann Sie für kitMarketPlace freischalten!</p>');
+define('market_error_lepton_group_invalid',		'<p>Die LEPTON Gruppe <b>%s</b> wurde nicht gefunden, bitte prüfen Sie die Parameter die an kitMarketPlace übergeben werden!</p>');
+define('market_error_lepton_group_missing',		'<p>Es ist keine LEPTON Gruppe gesetzt, kitMarketPlace kann die Zugriffsberechtigung nicht prüfen!</p>');
 define('market_error_no_categories',					'<p>Es sind keine Kategorien definier!</p>');
 define('market_error_undefined',							'<p>Uuuups, da ist gerade etwas schiefgelaufen und das Programm weiß nicht, was es tun soll. Bitte informieren Sie den Support über dieses Problem!</p>');
 

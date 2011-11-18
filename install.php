@@ -9,8 +9,24 @@
  * @version $Id$
  */
 
-// prevent this file from being accessed directly
-if (!defined('WB_PATH')) die('invalid call of '.$_SERVER['SCRIPT_NAME']);
+// include class.secure.php to protect this file and the whole CMS!
+if (defined('WB_PATH')) {    
+    if (defined('LEPTON_VERSION')) include(WB_PATH.'/framework/class.secure.php'); 
+} else {
+    $oneback = "../";
+    $root = $oneback;
+    $level = 1;
+    while (($level < 10) && (!file_exists($root.'/framework/class.secure.php'))) {
+        $root .= $oneback;
+        $level += 1;
+    }
+    if (file_exists($root.'/framework/class.secure.php')) { 
+        include($root.'/framework/class.secure.php'); 
+    } else {
+        trigger_error(sprintf("[ <b>%s</b> ] Can't include class.secure.php!", $_SERVER['SCRIPT_NAME']), E_USER_ERROR);
+    }
+}
+// end include class.secure.php
 
 // include GENERAL language file
 if(!file_exists(WB_PATH .'/modules/kit_tools/languages/' .LANGUAGE .'.php')) {
@@ -32,6 +48,7 @@ else {
 
 require_once(WB_PATH.'/modules/kit_tools/class.droplets.php');
 require_once(WB_PATH.'/modules/kit_market/class.market.php');
+require_once WB_PATH.'/modules/kit_form/class.form.php';
 
 global $admin;
 
@@ -48,16 +65,42 @@ foreach ($tables as $table) {
 	}
 }
 
+// import forms from /forms to kitForm
+$kitForm = new dbKITform();
+$dir_name = WB_PATH.'/modules/'.basename(dirname(__FILE__)).'/forms/';
+$folder = opendir($dir_name);
+$names = array();
+while (false !== ($file = readdir($folder))) {
+    $ff = array();
+    $ff = explode('.', $file);
+    $ext = end($ff);
+    if ($ext	==	'kit_form') {
+        $names[] = $file;
+    }
+}
+closedir($folder);
+$message = '';
+foreach ($names as $file_name) {
+    $form_file = $dir_name.$file_name;
+    $form_id = -1;
+    $msg = '';
+    if (!$kitForm->importFormFile($form_file, '', $form_id, $msg, true)) {
+        if ($kitForm->isError()) $error .= sprintf('[IMPORT FORM %s] %s', $file_name, $kitForm->getError());
+    }
+    $message .= $msg;
+}
+
 // Install Droplets
 $droplets = new checkDroplets();
 $droplets->droplet_path = WB_PATH.'/modules/kit_market/droplets/';
 
 if ($droplets->insertDropletsIntoTable()) {
-  $message = sprintf(tool_msg_install_droplets_success, 'kitMarketPlace');
+  $message .= sprintf(tool_msg_install_droplets_success, 'kitMarketPlace');
 }
 else {
-  $message = sprintf(tool_msg_install_droplets_failed, 'kitMarketPlace', $droplets->getError());
+  $message .= sprintf(tool_msg_install_droplets_failed, 'kitMarketPlace', $droplets->getError());
 }
+
 if ($message != "") {
   echo '<script language="javascript">alert ("'.$message.'");</script>';
 }
