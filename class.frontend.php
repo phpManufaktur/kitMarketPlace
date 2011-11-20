@@ -62,23 +62,30 @@ class marketFrontend {
     private $use_lepton_auth = false; // Authentication via LEPTON user interface
     
     const param_preset = 'preset';
-    const param_lepton_groups = '';
+    const param_lepton_groups = 'lepton_groups';
+    const param_switch = 'switch';
     
     private $params = array(
             self::param_preset => 1,
-            self::param_lepton_groups
+            self::param_lepton_groups => '',
+            self::param_switch => ''
             );
     
     private $tab_main_navigation_array = array(
-    self::action_market => market_tab_market, 
-    self::action_account => market_tab_account);
+            self::action_market => market_tab_market, 
+            self::action_account => market_tab_account
+            );
     
     private $tab_account_navigation_array = array(
-    self::action_overview => market_tab_overview, 
-    self::action_advertisement_add => market_tab_new_advertisement, 
-    self::action_account => market_tab_account, 
-    self::action_logout => market_tab_logout);
+            self::action_overview => market_tab_overview, 
+            self::action_advertisement_add => market_tab_new_advertisement, 
+            self::action_account => market_tab_account, 
+            self::action_logout => market_tab_logout
+            );
 
+    protected $switchKITidea = false;
+    
+    
     public function __construct() {
         global $kitLibrary;
         global $dbMarketCfg;
@@ -109,25 +116,53 @@ class marketFrontend {
             return false;
         }
         // if LEPTON group is set, authenticate via LEPTON USER
-        if (! empty($this->params[self::param_lepton_groups])) {
+        if (!empty($this->params[self::param_lepton_groups])) { 
             $gs = explode(',', $this->params[self::param_lepton_groups]);
             $grps = array();
             foreach ($gs as $g) {
+                $g = trim($g);
+                if (!empty($g)) { echo "g:$g";
                 $SQL = sprintf("SELECT group_id FROM %sgroups WHERE name='%s'", TABLE_PREFIX, trim($g));
                 if (false === ($id = $database->get_one($SQL))) {
                     $this->setError(sprintf('[%s - %s] %s', __METHOD__, __LINE__, sprintf(market_error_lepton_group_invalid, $g)));
                     return false;
                 }
                 $grps[] = $id;
+                $this->use_lepton_auth = true;
+                }
             }
             $this->params[self::param_lepton_groups] = implode(',', $grps);
-            $this->use_lepton_auth = true;
-        }        
+        }   
+        else {
+            $this->use_lepton_auth = false;
+        }     
+        // if SWITCH is set check for specials...
+        if (!empty($this->params[self::param_switch])) {
+            $sw = explode(',', $this->params[self::param_switch]);
+            if (in_array('kit_idea', $sw) || in_array('kitidea', $sw)) {
+                // set switch for kitIdea
+                $this->setSwitchKITidea(true);
+            }
+        } 
         return true;
     } // setParams()
 
     
     /**
+     * @return the $switchKITidea
+     */
+    protected function getSwitchKITidea() {
+        return $this->switchKITidea;
+    }
+
+	/**
+     * @param boolean $switchKITidea
+     */
+    protected function setSwitchKITidea($switchKITidea) {
+        $this->switchKITidea = $switchKITidea;
+    }
+
+	/**
      * Set $this->error to $error
      * 
      * @param STR $error
@@ -405,13 +440,26 @@ class marketFrontend {
     public function accountShow($action, $content) {
         $navigation = array();
         foreach ($this->tab_account_navigation_array as $key => $value) {
-            $navigation[] = array('active' => ($key == $action) ? 1 : 0, 
-            'url' => sprintf('%s%s%s=%s&%s=%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', self::request_main_action, self::action_account, self::request_account_action, $key), 
+            if ($this->getSwitchKITidea() && (($key == self::action_account) || ($key == self::action_logout))) continue;
+            $navigation[] = array(
+                    'active' => ($key == $action) ? 1 : 0, 
+                    'url' => sprintf(
+                            '%s%s%s', 
+                            $this->page_link, 
+                            (strpos($this->page_link, '?') === false) ? '?' : '&',
+                            http_build_query(array(
+                                    self::request_main_action => self::action_account, 
+                                    self::request_account_action => $key
+                                )) 
+                        ), 
             'text' => $value);
         }
-        $data = array('WB_URL' => WB_URL, 'navigation' => $navigation, 
-        'error' => ($this->isError()) ? 1 : 0, 
-        'content' => ($this->isError()) ? $this->getError() : $content);
+        $data = array(
+                'WB_URL' => WB_URL, 
+                'navigation' => $navigation, 
+                'error' => ($this->isError()) ? 1 : 0, 
+                'content' => ($this->isError()) ? $this->getError() : $content
+                );
         return $this->getTemplate('body.account.htt', $data);
     } // accountShow()
 
@@ -1083,28 +1131,56 @@ class marketFrontend {
                 }
                 $cat_str = implode(' > ', $cat);
                 $list[] = array(
-                'id' => array('value' => $ad[dbMarketAdvertisement::field_id], 
-                'link' => sprintf('%s%s%s=%s&%s=%s&%s=%s', $this->page_link, (strpos($this->page_link, '?') === false) ? '?' : '&', self::request_main_action, self::action_account, self::request_account_action, self::action_advertisement_add, dbMarketAdvertisement::field_id, $ad[dbMarketAdvertisement::field_id])), 
-                'type' => array(
-                'offer' => ($ad[dbMarketAdvertisement::field_ad_type] == dbMarketAdvertisement::type_offer) ? 1 : 0), 
-                'title' => array(
-                'text' => $ad[dbMarketAdvertisement::field_title]), 
-                'category' => array('text' => $cat_str));
+                    'id' => array(
+                            'value' => $ad[dbMarketAdvertisement::field_id], 
+                            'link' => sprintf(
+                                    '%s%s%s', 
+                                    $this->page_link, 
+                                    (strpos($this->page_link, '?') === false) ? '?' : '&',
+                                    http_build_query(array(
+                                            self::request_main_action => self::action_account, 
+                                            self::request_account_action => self::action_advertisement_add, 
+                                            dbMarketAdvertisement::field_id => $ad[dbMarketAdvertisement::field_id]
+                                            ))
+                                    )
+                            ), 
+                    'type' => array(
+                            'offer' => ($ad[dbMarketAdvertisement::field_ad_type] == dbMarketAdvertisement::type_offer) ? 1 : 0
+                            ), 
+                    'title' => array(
+                            'text' => $ad[dbMarketAdvertisement::field_title]
+                            ), 
+                    'category' => array(
+                            'text' => $cat_str
+                            )
+                        );
             }
             
-            $form = array('head' => market_head_advertisement_overview, 
-            'is_message' => $this->isMessage() ? 1 : 0, 
-            'message' => $this->isMessage() ? $this->getMessage() : market_intro_advertisement_overview, 
-            'header' => array('id' => market_th_id, 
-            'kit_id' => market_th_kit_id, 'category' => market_th_category, 
-            'type' => market_th_type, 'commercial' => market_th_commercial, 
-            'title' => market_th_title, 'price' => market_th_price, 
-            'price_type' => market_th_price_type, 
-            'pictures' => market_th_pictures, 'text' => market_th_text, 
-            'status' => market_th_status, 'start_date' => market_th_start_date, 
-            'end_date' => market_th_end_date, 
-            'timestamp' => market_th_timestamp));
-            $data = array('form' => $form, 'advertisement' => $list);
+            $form = array(
+                    'head' => market_head_advertisement_overview, 
+                    'is_message' => $this->isMessage() ? 1 : 0, 
+                    'message' => $this->isMessage() ? $this->getMessage() : market_intro_advertisement_overview, 
+                    'header' => array(
+                            'id' => market_th_id, 
+                            'kit_id' => market_th_kit_id, 
+                            'category' => market_th_category, 
+                            'type' => market_th_type, 
+                            'commercial' => market_th_commercial, 
+                            'title' => market_th_title, 
+                            'price' => market_th_price, 
+                            'price_type' => market_th_price_type, 
+                            'pictures' => market_th_pictures, 
+                            'text' => market_th_text, 
+                            'status' => market_th_status, 
+                            'start_date' => market_th_start_date, 
+                            'end_date' => market_th_end_date, 
+                            'timestamp' => market_th_timestamp
+                            )
+                    );
+            $data = array(
+                    'form' => $form, 
+                    'advertisement' => $list
+                    );
             return $this->getTemplate('account.advertisement.overview.list.htt', $data);
         }
     } // accountOverview()

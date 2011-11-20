@@ -80,7 +80,7 @@ foreach ($names as $file_name) {
 // remove Droplets
 $dbDroplets = new dbDroplets();
 // the array contains the droplets to remove
-$droplets = array();
+$droplets = array('kit_market');
 foreach ($droplets as $droplet) {
     $where = array(dbDroplets::field_name => $droplet);
     if (!$dbDroplets->sqlDeleteRecord($where)) {
@@ -90,7 +90,7 @@ foreach ($droplets as $droplet) {
 
 // Install Droplets
 $droplets = new checkDroplets();
-$droplets->droplet_path = WB_PATH.'/modules/kit_idea/droplets/';
+$droplets->droplet_path = WB_PATH.'/modules/kit_market/droplets/';
 
 if ($droplets->insertDropletsIntoTable()) {
     $message .= sprintf(tool_msg_install_droplets_success, 'kitMarketPlace');

@@ -3,6 +3,12 @@ kitMarketPlace
 Ralf Hertsch, Stockholmer Str. 31, 13359 Berlin (Germany)
 http://phpManufaktur.de - ralf.hertsch@phpManufaktur.de
 
+Release 0.12
+2011-11-20
+added: parameter "switch" for the droplet enable to configure special settings,
+  i.e. "switch=kit_idea" tells kitMarketPlace to interact with kitIdea
+fixed: upgrade.php does not update the droplet
+
 Release 0.11
 2011-11-18
 fixed: code cleanup in class.backend.php and class.frontend.php
