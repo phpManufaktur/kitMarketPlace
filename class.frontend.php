@@ -563,6 +563,7 @@ class marketFrontend {
                 return false;
             }
             if (in_array($cat, $categories)) {
+                // ok - user is authenticated
                 return true;
             } else {
                 $this->setError(market_error_auth_wrong_category);

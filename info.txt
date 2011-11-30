@@ -7,7 +7,7 @@ Release 0.12
 2011-11-20
 added: parameter "switch" for the droplet enable to configure special settings,
   i.e. "switch=kit_idea" tells kitMarketPlace to interact with kitIdea
-fixed: upgrade.php does not update the droplet
+fixed: upgrade.php does not force the droplet update
 
 Release 0.11
 2011-11-18
