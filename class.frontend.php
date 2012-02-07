@@ -586,8 +586,8 @@ class marketFrontend {
         
         $form = new formFrontend();
         $params = $form->getParams();
-        $params[formFrontend::param_form] = $dlg;
-        $params[formFrontend::param_return] = true;
+        $params['form'] = $dlg;
+        $params['return'] = true;
         $form->setParams($params);
         
         $result = $form->action();
@@ -617,8 +617,8 @@ class marketFrontend {
         $dlg = $dbMarketCfg->getValue(dbMarketCfg::cfgFormDlgAccount);
         $form = new formFrontend();
         $params = $form->getParams();
-        $params[formFrontend::param_form] = $dlg;
-        $params[formFrontend::param_return] = true;
+        $params['form'] = $dlg;
+        $params['return'] = true;
         $form->setParams($params);
         return $form->action();
     } // accountAccountDlg()
