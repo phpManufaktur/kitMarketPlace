@@ -1,32 +1,36 @@
 <?php
+
 /**
  * kitMarketPlace
- * 
- * @author Ralf Hertsch (ralf.hertsch@phpmanufaktur.de)
+ *
+ * @author Ralf Hertsch <ralf.hertsch@phpmanufaktur.de>
  * @link http://phpmanufaktur.de
- * @copyright 2011
- * @license GNU GPL (http://www.gnu.org/licenses/gpl.html)
- * @version $Id$
+ * @copyright 2011 - 2012
+ * @license MIT License (MIT) http://www.opensource.org/licenses/MIT
  */
 
 // include class.secure.php to protect this file and the whole CMS!
-if (defined('WB_PATH')) {    
-    if (defined('LEPTON_VERSION')) include(WB_PATH.'/framework/class.secure.php'); 
-} else {
-    $oneback = "../";
-    $root = $oneback;
-    $level = 1;
-    while (($level < 10) && (!file_exists($root.'/framework/class.secure.php'))) {
-        $root .= $oneback;
-        $level += 1;
-    }
-    if (file_exists($root.'/framework/class.secure.php')) { 
-        include($root.'/framework/class.secure.php'); 
-    } else {
-        trigger_error(sprintf("[ <b>%s</b> ] Can't include class.secure.php!", $_SERVER['SCRIPT_NAME']), E_USER_ERROR);
-    }
+if (defined('WB_PATH')) {
+  if (defined('LEPTON_VERSION'))
+    include(WB_PATH.'/framework/class.secure.php');
+}
+else {
+  $oneback = "../";
+  $root = $oneback;
+  $level = 1;
+  while (($level < 10) && (!file_exists($root.'/framework/class.secure.php'))) {
+    $root .= $oneback;
+    $level += 1;
+  }
+  if (file_exists($root.'/framework/class.secure.php')) {
+    include($root.'/framework/class.secure.php');
+  }
+  else {
+    trigger_error(sprintf("[ <b>%s</b> ] Can't include class.secure.php!", $_SERVER['SCRIPT_NAME']), E_USER_ERROR);
+  }
 }
 // end include class.secure.php
+
 
 class dbMarketAdvertisement extends dbConnectLE {
 
@@ -44,7 +48,7 @@ class dbMarketAdvertisement extends dbConnectLE {
 	const field_start_date			= 'ad_start_date';
 	const field_end_date				= 'ad_end_date';
 	const field_timestamp				= 'ad_timestamp';
-	
+
 	public $field_name_array = array(
 		self::field_id							=> market_field_id,
 		self::field_kit_id					=> market_field_kit_id,
@@ -53,7 +57,7 @@ class dbMarketAdvertisement extends dbConnectLE {
 		self::field_commercial			=> market_field_commercial,
 		self::field_title						=> market_field_title,
 		self::field_price						=> market_field_price,
-		self::field_price_type			=> market_field_price_type,  
+		self::field_price_type			=> market_field_price_type,
 		self::field_pictures				=> market_field_price_type,
 		self::field_text						=> market_field_text,
 		self::field_status					=> market_field_status,
@@ -61,39 +65,39 @@ class dbMarketAdvertisement extends dbConnectLE {
 		self::field_end_date				=> market_field_end_date,
 		self::field_timestamp				=> market_field_timestamp
 	);
-	
+
 	const type_offer						= 1;
 	const type_search						= 2;
 	const type_undefined				= 0;
-	
+
 	public $type_array = array(
 		self::type_offer					=> market_type_offer,
 		self::type_search					=> market_type_search,
 		//self::type_undefined			=> market_type_undefined
 	);
-	
+
 	const commercial_yes				= 1;
 	const commercial_no					= 2;
 	const commercial_undefined	= 0;
-	
+
 	public $commercial_array = array(
 		self::commercial_yes				=> market_commercial_yes,
 		self::commercial_no					=> market_commercial_no,
-		//self::commercial_undefined	=> market_commercial_undefined 
+		//self::commercial_undefined	=> market_commercial_undefined
 	);
-	
+
 	const price_fixed						= 1;
 	const price_asking					= 2;
 	const price_give_away				= 3;
 	const price_undefined				= 0;
-	
+
 	public $price_array = array(
 		self::price_fixed					=> market_price_fixed,
 		self::price_asking				=> market_price_asking,
 		self::price_give_away			=> market_price_give_away,
 		//self::price_undefined			=> market_price_undefined
 	);
-	
+
 	const status_undefined			= 0;
 	const status_active					= 1;
 	const status_locked					= 2;
@@ -101,8 +105,8 @@ class dbMarketAdvertisement extends dbConnectLE {
 	const status_outdated				= 4;
 	const status_deleted				= 5;
 	const status_rejected				= 6;
-	
-	
+
+
 	public $status_array = array(
 		self::status_active				=> market_status_active,
 		self::status_closed				=> market_status_closed,
@@ -110,11 +114,11 @@ class dbMarketAdvertisement extends dbConnectLE {
 		self::status_locked				=> market_status_locked,
 		self::status_outdated			=> market_status_outdated,
 		self::status_rejected			=> market_status_rejected,
-		//self::status_undefined		=> market_status_undefined	
+		//self::status_undefined		=> market_status_undefined
 	);
-	
+
 	private $createTables 		= false;
-  
+
   public function __construct($createTables = false) {
   	$this->createTables = $createTables;
   	parent::__construct();
@@ -132,7 +136,7 @@ class dbMarketAdvertisement extends dbConnectLE {
   	$this->addFieldDefinition(self::field_status, "TINYINT NOT NULL DEFAULT '".self::status_undefined."'");
   	$this->addFieldDefinition(self::field_start_date, "DATE NOT NULL DEFAULT '0000-00-00'");
   	$this->addFieldDefinition(self::field_end_date, "DATE NOT NULL DEFAULT '0000-00-00'");
-  	$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");	
+  	$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");
   	$this->checkFieldDefinitions();
   	// Tabelle erstellen
   	if ($this->createTables) {
@@ -143,11 +147,11 @@ class dbMarketAdvertisement extends dbConnectLE {
   		}
   	}
   } // __construct()
-	
+
 } // class dbMarketAdvertisement
 
 class dbMarketCategories extends dbConnectLE {
-	
+
 	const field_id							= 'cat_id';
 	const field_level_01				= 'cat_level_01';
 	const field_level_02				= 'cat_level_02';
@@ -156,12 +160,12 @@ class dbMarketCategories extends dbConnectLE {
 	const field_level_05				= 'cat_level_05';
 	const field_status					= 'cat_status';
 	const field_timestamp				= 'cat_timestamp';
-	 
+
 	const status_active					= 1;
 	const status_deleted				= 0;
-	
+
 	private $createTables 		= false;
-  
+
   public function __construct($createTables = false) {
   	$this->createTables = $createTables;
   	parent::__construct();
@@ -173,7 +177,7 @@ class dbMarketCategories extends dbConnectLE {
 		$this->addFieldDefinition(self::field_level_04, "VARCHAR(80) NOT NULL DEFAULT ''");
 		$this->addFieldDefinition(self::field_level_05, "VARCHAR(80) NOT NULL DEFAULT ''");
 		$this->addFieldDefinition(self::field_status, "TINYINT NOT NULL DEFAULT '".self::status_active."'");
-  	$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");	
+  	$this->addFieldDefinition(self::field_timestamp, "TIMESTAMP");
   	$this->checkFieldDefinitions();
   	// Tabelle erstellen
   	if ($this->createTables) {
@@ -184,12 +188,12 @@ class dbMarketCategories extends dbConnectLE {
   		}
   	}
   } // __construct()
-	
-	
+
+
 } // class dbMarketCategories
 
 class dbMarketCfg extends dbConnectLE {
-	
+
 	const field_id						= 'cfg_id';
 	const field_name					= 'cfg_name';
 	const field_type					= 'cfg_type';
@@ -198,10 +202,10 @@ class dbMarketCfg extends dbConnectLE {
 	const field_description		= 'cfg_desc';
 	const field_status				= 'cfg_status';
 	const field_timestamp			= 'cfg_timestamp';
-	
+
 	const status_active				= 1;
 	const status_deleted			= 0;
-	
+
 	const type_undefined			= 0;
 	const type_array					= 7;
   const type_boolean				= 1;
@@ -211,7 +215,7 @@ class dbMarketCfg extends dbConnectLE {
   const type_path						= 5;
   const type_string					= 6;
   const type_url						= 8;
-  
+
   public $type_array = array(
   	self::type_undefined		=> '-UNDEFINED-',
   	self::type_array				=> 'ARRAY',
@@ -223,10 +227,10 @@ class dbMarketCfg extends dbConnectLE {
   	self::type_string				=> 'STRING',
   	self::type_url					=> 'URL'
   );
-  
+
   private $createTables 		= false;
   private $message					= '';
-    
+
   const cfgMarketExec				= 'cfgMarketExec';
   const cfgCategory_01			= 'cfgCategory_01';
   const cfgCategory_02			= 'cfgCategory_02';
@@ -244,7 +248,7 @@ class dbMarketCfg extends dbConnectLE {
   const cfgAdImageDir				= 'cfgAdImageDir';
   const cfgAdImagePrevWidth = 'cfgAdImagePrevWidth';
   const cfgAdListEntries		= 'cfgAdListEntries';
-  
+
   public $config_array = array(
   	array('market_label_cfg_exec', self::cfgMarketExec, self::type_boolean, '1', 'market_desc_cfg_exec'),
   	array('market_label_category_01', self::cfgCategory_01, self::type_string, 'Kategorie', 'market_desc_cfg_category_01'),
@@ -262,10 +266,10 @@ class dbMarketCfg extends dbConnectLE {
   	array('market_label_cfg_ad_image_types', self::cfgAdImageTypes, self::type_array, 'jpg,png,tif,gif', 'market_desc_cfg_ad_image_types'),
   	array('market_label_cfg_ad_image_dir', self::cfgAdImageDir, self::type_string, 'kit_market', 'market_desc_cfg_ad_image_dir'),
   	array('market_label_cfg_ad_image_prev_width', self::cfgAdImagePrevWidth, self::type_integer, '200', 'market_desc_cfg_ad_image_prev_width'),
-  	array('market_label_cfg_ad_list_entries', self::cfgAdListEntries, self::type_integer, '20', 'market_desc_cfg_ad_list_entries') 
-  );  
-  
-  
+  	array('market_label_cfg_ad_list_entries', self::cfgAdListEntries, self::type_integer, '20', 'market_desc_cfg_ad_list_entries')
+  );
+
+
   public function __construct($createTables = false) {
   	$this->createTables = $createTables;
   	parent::__construct();
@@ -295,14 +299,14 @@ class dbMarketCfg extends dbConnectLE {
   	}
   	date_default_timezone_set(tool_cfg_time_zone);
   } // __construct()
-  
+
   public function setMessage($message) {
     $this->message = $message;
   } // setMessage()
 
   /**
     * Get Message from $this->message;
-    * 
+    *
     * @return STR $this->message
     */
   public function getMessage() {
@@ -311,21 +315,21 @@ class dbMarketCfg extends dbConnectLE {
 
   /**
     * Check if $this->message is empty
-    * 
+    *
     * @return BOOL
     */
   public function isMessage() {
     return (bool) !empty($this->message);
   } // isMessage
-  
+
   /**
    * Aktualisiert den Wert $new_value des Datensatz $name
-   * 
+   *
    * @param $new_value STR - Wert, der uebernommen werden soll
    * @param $id INT - ID des Datensatz, dessen Wert aktualisiert werden soll
-   * 
+   *
    * @return BOOL Ergebnis
-   * 
+   *
    */
   public function setValueByName($new_value, $name) {
   	$where = array();
@@ -341,7 +345,7 @@ class dbMarketCfg extends dbConnectLE {
   	}
   	return $this->setValue($new_value, $config[0][self::field_id]);
   } // setValueByName()
-  
+
   /**
    * Haengt einen Slash an das Ende des uebergebenen Strings
    * wenn das letzte Zeichen noch kein Slash ist
@@ -351,9 +355,9 @@ class dbMarketCfg extends dbConnectLE {
    */
   public function addSlash($path) {
   	$path = substr($path, strlen($path)-1, 1) == "/" ? $path : $path."/";
-  	return $path;  
+  	return $path;
   }
-  
+
   /**
    * Wandelt einen String in einen Float Wert um.
    * Geht davon aus, dass Dezimalzahlen mit ',' und nicht mit '.'
@@ -375,7 +379,7 @@ class dbMarketCfg extends dbConnectLE {
 		$int = intval($string);
 		return $int;
   }
-  
+
 	/**
 	 * Ueberprueft die uebergebene E-Mail Adresse auf logische Gueltigkeit
 	 *
@@ -390,13 +394,13 @@ class dbMarketCfg extends dbConnectLE {
 		else {
 			return false; }
 	}
-  
+
   /**
    * Aktualisiert den Wert $new_value des Datensatz $id
-   * 
+   *
    * @param $new_value STR - Wert, der uebernommen werden soll
    * @param $id INT - ID des Datensatz, dessen Wert aktualisiert werden soll
-   * 
+   *
    * @return BOOL Ergebnis
    */
   public function setValue($new_value, $id) {
@@ -421,7 +425,7 @@ class dbMarketCfg extends dbConnectLE {
   		foreach ($worker as $item) {
   			$data[] = trim($item);
   		};
-  		$value = implode(",", $data);  			
+  		$value = implode(",", $data);
   		break;
   	case self::type_boolean:
   		$value = (bool) $new_value;
@@ -433,7 +437,7 @@ class dbMarketCfg extends dbConnectLE {
   		}
   		else {
   			$this->setMessage(sprintf(tool_msg_invalid_email, $new_value));
-  			return false;			
+  			return false;
   		}
   		break;
   	case self::type_float:
@@ -460,12 +464,12 @@ class dbMarketCfg extends dbConnectLE {
   	}
   	return true;
   } // setValue()
-  
+
   /**
    * Gibt den angeforderten Wert zurueck
-   * 
-   * @param $name - Bezeichner 
-   * 
+   *
+   * @param $name - Bezeichner
+   *
    * @return WERT entsprechend des TYP
    */
   public function getValue($name) {
@@ -507,7 +511,7 @@ class dbMarketCfg extends dbConnectLE {
   	endswitch;
   	return $result;
   } // getValue()
-  
+
   public function checkConfig() {
   	foreach ($this->config_array as $item) {
   		$where = array();
@@ -533,7 +537,7 @@ class dbMarketCfg extends dbConnectLE {
   	}
   	return true;
   }
-	  
+
 } // class dbMarketCfg
 
 
