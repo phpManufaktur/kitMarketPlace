@@ -1,0 +1,35 @@
+### kitMarketPlace
+2011 - 2012 by phpManufaktur
+Ralf Hertsch, Stockholmer Str. 31, 13359 Berlin (Germany)
+http://phpManufaktur.de - ralf.hertsch@phpManufaktur.de
+
+
+Release 0.13 - 2012-06-19
+
+* changed WebsiteBaker version check
+* changed license from GNU GPL to MIT license
+* added LICENSE
+* removed info.txt
+* added CHANGELOG
+* added README.md
+* updated all header informations
+
+Release 0.12 - 2011-11-20
+
+* added: parameter "switch" for the droplet enable to configure special settings,
+  i.e. "switch=kit_idea" tells kitMarketPlace to interact with kitIdea
+* fixed: upgrade.php does not force the droplet update
+
+Release 0.11 - 2011-11-18
+
+* fixed: code cleanup in class.backend.php and class.frontend.php
+* added: compatibillity code for LEPTON CMS
+* added: param lepton_groups for the [[kit_market]] droplet allows to specify one 
+  or more LEPTON or WB group. In this case authentication is handeld by CMS and 
+  not by KIT
+* added: default forms market_login.kit_form and market_register.kit_form for use
+  with kitForm
+
+Release 0.10 - 2011-05-20
+
+* First Beta Release
